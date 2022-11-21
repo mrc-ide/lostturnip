@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 #include <limits>
 #include <stdexcept>
 
@@ -27,12 +28,9 @@ result<real_type> find_result(F f, real_type a, real_type b,
     return result<real_type>{b, fb, iterations, true};
   }
   if (fa * fb > 0) {
-    // Same sign
-    //
-    // Be careful with result, as it will contain junk
-    //
-    // (TODO, return mixed type NA here)
-    return result<real_type>{a, fa, iterations, false};
+    // Same sign; can't find root with this:
+    constexpr real_type na = std::numeric_limits<real_type>::quiet_NaN();
+    return result<real_type>{na, na, iterations, false};
   }
 
   real_type c = a;
@@ -111,11 +109,7 @@ result<real_type> find_result(F f, real_type a, real_type b,
 
     // Adjust the step to be not less than tolerance
     if (std::abs(new_step) < tol_act) {
-      if (new_step > 0) {
-        new_step = tol_act;
-      } else {
-        new_step = -tol_act;
-      }
+      new_step = std::copysign(tol_act, new_step);
     }
 
     // Save the previous approximation
@@ -130,6 +124,7 @@ result<real_type> find_result(F f, real_type a, real_type b,
     }
   }
 
+  // Did not converge in time, return best point so far though:
   return result<real_type>{b, fb, iterations, false};
 }
 
