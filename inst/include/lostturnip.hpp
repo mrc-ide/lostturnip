@@ -3,6 +3,22 @@
 #include <limits>
 #include <stdexcept>
 
+// CUDA compatibility
+#ifdef __NVCC__
+#define __nv_exec_check_disable__ _Pragma("nv_exec_check_disable")
+#else
+#define __nv_exec_check_disable__
+#define __host__
+#define __device__
+#define __global__
+#endif
+
+#ifdef __CUDA_ARCH__
+#define SYNCWARP __syncwarp();
+#else
+#define SYNCWARP
+#endif
+
 namespace lostturnip {
 
 template <typename real_type>
@@ -15,6 +31,7 @@ struct result {
 
 // From zeroin.c, in brent.shar
 template <typename real_type, typename F>
+__host__ __device__
 result<real_type> find_result(F f, real_type a, real_type b,
                               real_type tol, int max_iterations) {
   real_type fa = f(a);
@@ -37,7 +54,7 @@ result<real_type> find_result(F f, real_type a, real_type b,
   } else {
     real_type c = a;
     real_type fc = fa;   // c = a, f(c) = f(a)
-    const real_type eps = std::numeric_limits<real_type>::epsilon();
+    constexpr real_type eps = std::numeric_limits<real_type>::epsilon();
 
     for (; iterations < max_iterations; ++iterations) { // Main iteration loop
       // Distance from the last but one to the last approximation
@@ -127,15 +144,22 @@ result<real_type> find_result(F f, real_type a, real_type b,
     }
   }
 
+  SYNCWARP
   return result<real_type>{b, fb, iterations, converged};
 }
 
 template <typename real_type, typename F>
+__host__ __device__
 real_type find(F f, real_type a, real_type b,
                real_type tol, int max_iterations) {
   const auto result = find_result(f, a, b, tol, max_iterations);
   if (!result.converged) {
+#ifdef __CUDA_ARCH__
+    print("some error\n");
+    __trap();
+#else
     throw std::runtime_error("some error");
+#endif
   }
   return result.x;
 }
