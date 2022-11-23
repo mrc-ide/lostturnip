@@ -41,6 +41,10 @@ All root finding attempts require a bounds on the root; a lower bound `a` and up
 
 If you use `lostturnip::find_result`, be sure to check convergence. If you use `lostturnip::find`, be sure you can handle an exception.
 
+## Usage from cuda
+
+This will work from CUDA without modification; see [`cuda`](cuda) for an example program. Be careful where the root is not found because `lostturnip::find` will call `__trap()` which will crash the kernel and require the program to be restarted to continue.
+
 ## Installation
 
 To install `lostturnip`:
