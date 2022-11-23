@@ -3,23 +3,18 @@
 #include <limits>
 #include <stdexcept>
 
-// CUDA compatibility
-#ifdef __NVCC__
-#define __nv_exec_check_disable__ _Pragma("nv_exec_check_disable")
-#else
-#define __nv_exec_check_disable__
-#define __host__
-#define __device__
-#define __global__
-#endif
-
-#ifdef __CUDA_ARCH__
-#define SYNCWARP __syncwarp();
-#else
-#define SYNCWARP
-#endif
-
 namespace lostturnip {
+
+// Declaring these here, rather than within the find_result, as
+// otherwise we get a compiler warning about using experimental cuda
+// features. It will be equivalent though, but does require C++14.
+namespace {
+template <typename real_type>
+constexpr real_type na = std::numeric_limits<real_type>::quiet_NaN();
+
+template <typename real_type>
+constexpr real_type eps = std::numeric_limits<real_type>::epsilon();
+}
 
 template <typename real_type>
 struct result {
@@ -31,7 +26,9 @@ struct result {
 
 // From zeroin.c, in brent.shar
 template <typename real_type, typename F>
+#ifdef __NVCC__
 __host__ __device__
+#endif
 result<real_type> find_result(F f, real_type a, real_type b,
                               real_type tol, int max_iterations) {
   real_type fa = f(a);
@@ -47,14 +44,12 @@ result<real_type> find_result(F f, real_type a, real_type b,
     converged = true;
   } else if (fa * fb > 0) {
     // Same sign; can't find root with this:
-    constexpr real_type na = std::numeric_limits<real_type>::quiet_NaN();
-    b = na;
-    fb = na;
+    b = na<real_type>;
+    fb = na<real_type>;
     converged = false;
   } else {
     real_type c = a;
     real_type fc = fa;   // c = a, f(c) = f(a)
-    constexpr real_type eps = std::numeric_limits<real_type>::epsilon();
 
     for (; iterations < max_iterations; ++iterations) { // Main iteration loop
       // Distance from the last but one to the last approximation
@@ -76,7 +71,7 @@ result<real_type> find_result(F f, real_type a, real_type b,
       }
 
       // Actual tolerance
-      const real_type tol_act = 2 * eps * std::abs(b) + tol / 2;
+      const real_type tol_act = 2 * eps<real_type> * std::abs(b) + tol / 2;
       // Step at this iteration
       real_type new_step = (c - b) / 2;
 
@@ -144,12 +139,16 @@ result<real_type> find_result(F f, real_type a, real_type b,
     }
   }
 
-  SYNCWARP
+#ifdef __CUDA_ARCH__
+  __syncwarp();
+#endif
   return result<real_type>{b, fb, iterations, converged};
 }
 
 template <typename real_type, typename F>
+#ifdef __NVCC__
 __host__ __device__
+#endif
 real_type find(F f, real_type a, real_type b,
                real_type tol, int max_iterations) {
   const auto result = find_result(f, a, b, tol, max_iterations);
