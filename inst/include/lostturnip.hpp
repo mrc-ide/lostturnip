@@ -154,7 +154,7 @@ real_type find(F f, real_type a, real_type b,
   const auto result = find_result(f, a, b, tol, max_iterations);
   if (!result.converged) {
 #ifdef __CUDA_ARCH__
-    print("some error\n");
+    printf("some error\n");
     __trap();
 #else
     throw std::runtime_error("some error");
