@@ -69,10 +69,41 @@
 <!-- badges: start -->
 
 <div class="section level2">
+<h2 id="one-dimensional-root-finding-from-c">One dimensional root finding from C++<a class="anchor" aria-label="anchor" href="#one-dimensional-root-finding-from-c"></a>
+</h2>
+<p>This package exists to wrap <a href="https://en.wikipedia.org/wiki/Brent%27s_method" class="external-link">Brent’s method</a> for one dimensional root finding, implemented in C++ and available for use in other R packages via R’s <code>LinkingTo</code> facility. It is designed to work well with <a href="https://learn.microsoft.com/en-us/cpp/cpp/lambda-expressions-in-cpp?view=msvc-170" class="external-link">C++11 “lambda functions”</a> but will work with anything that compiler works out it can call.</p>
+</div>
+<div class="section level2">
+<h2 id="to-use">To use<a class="anchor" aria-label="anchor" href="#to-use"></a>
+</h2>
+<p>In your package, add</p>
+<pre><code><span><span class="va">LinkingTo</span><span class="op">:</span> <span class="va">lostturnip</span></span></code></pre>
+<p>in your <code>DESCRIPTION</code> file, then in your C++ code:</p>
+<pre><code>#include &lt;lostturnip.hpp&gt;
+
+// ...
+
+  const auto fn = [&amp;](double x) { return (x + c) * (x - 1) * (x - 1); };
+  const auto root = lostturnip::find&lt;double&gt;(fn, -4, 4.0 / 3.0, 1e-6, 100);</code></pre>
+<p>There are two main entrypoints:</p>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/utils/apropos.html" class="external-link">lostturnip::find</a></code> - search for the root and throw an error if it fails</li>
+<li>
+<code>lostturnup::find_result</code> - search for the root and never throw, returning an object that can be tested for convergence. The <code>lostturnip::result</code> object has members <code>x</code> (the best point so far), <code>fx</code> (<code>f</code> evaluated at <code>x</code>, very close to 0 if converged), <code>iterations</code> (the number of iterations carried out) and <code>converged</code> (boolean, indicating if we have converged).</li>
+</ul>
+<p>All root finding attempts require a bounds on the root; a lower bound <code>a</code> and upper bound <code>b</code> (i.e. we believe that the root exists in the interval <code>[a, b]</code>). There are several ways that convergence can fail:</p>
+<ul>
+<li>if <code>[a, b]</code> does not bracket the root (i.e., if <code>f(a)</code> has the same sign as <code>f(b)</code>). The result object contains <code>NaN</code> values for both <code>x</code> and <code>fx</code> in this case</li>
+<li>if the number of iterations is exceeded. The result object contains the best value so far in this case</li>
+</ul>
+<p>If you use <code>lostturnip::find_result</code>, be sure to check convergence. If you use <code><a href="https://rdrr.io/r/utils/apropos.html" class="external-link">lostturnip::find</a></code>, be sure you can handle an exception.</p>
+</div>
+<div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>To install <code>lostturnip</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mrc-ide/lostturnip"</span>, upgrade <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
