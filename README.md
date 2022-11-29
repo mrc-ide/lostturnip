@@ -34,7 +34,7 @@ There are two main entrypoints:
 * `lostturnip::find` - search for the root and throw an error if it fails
 * `lostturnup::find_result` - search for the root and never throw, returning an object that can be tested for convergence.  The `lostturnip::result` object has members `x` (the best point so far), `fx` (`f` evaluated at `x`, very close to 0 if converged), `iterations` (the number of iterations carried out) and `converged` (boolean, indicating if we have converged).
 
-There are several ways that convergence can fail:
+All root finding attempts require a bounds on the root; a lower bound `a` and upper bound `b` (i.e. we believe that the root exists in the interval `[a, b]`). There are several ways that convergence can fail:
 
 * if `[a, b]` does not bracket the root (i.e., if `f(a)` has the same sign as `f(b)`). The result object contains `NaN` values for both `x` and `fx` in this case
 * if the number of iterations is exceeded. The result object contains the best value so far in this case
