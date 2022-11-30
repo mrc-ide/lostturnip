@@ -81,6 +81,9 @@ result<real_type> find_result(F f, real_type a, real_type b,
         break;
       }
 
+      // increase readability below, avoids many repeated static casts
+      const real_type one = 1;
+
       // Decide if the interpolation can be tried
       //
       // If prev_step was large enough and was in true direction, then
@@ -93,14 +96,14 @@ result<real_type> find_result(F f, real_type a, real_type b,
           // can only be applied
           const real_type t1 = fb / fa;
           p = cb * t1;
-          q = 1.0 - t1;
+          q = one - t1;
         } else {
           // Quadric inverse interpolation
           q = fa / fc;
           const real_type t1 = fb / fc;
           const real_type t2 = fb / fa;
-          p = t2 * (cb * q * (q - t1) - (b - a) * (t1 - 1.0));
-          q = (q - 1.0) * (t1 - 1.0) * (t2 - 1.0);
+          p = t2 * (cb * q * (q - t1) - (b - a) * (t1 - one));
+          q = (q - one) * (t1 - one) * (t2 - one);
         }
         if (p > 0) {
           // p was calculated with the opposite sign; make p positive
@@ -115,7 +118,7 @@ result<real_type> find_result(F f, real_type a, real_type b,
         //
         // If p / q is too large then the bissection procedure can
         // reduce [b,c] range to more extent
-        if (p < (0.75 * cb * q - std::abs(tol_act * q) / 2) &&
+        if (p < (static_cast<real_type>(0.75) * cb * q - std::abs(tol_act * q) / 2) &&
             p < std::abs(prev_step * q / 2)) {
           new_step = p / q;
         }
