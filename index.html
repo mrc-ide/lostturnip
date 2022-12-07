@@ -34,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">lostturnip</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.2</span>
       </span>
     </div>
 
@@ -98,6 +98,11 @@
 <li>if the number of iterations is exceeded. The result object contains the best value so far in this case</li>
 </ul>
 <p>If you use <code>lostturnip::find_result</code>, be sure to check convergence. If you use <code><a href="https://rdrr.io/r/utils/apropos.html" class="external-link">lostturnip::find</a></code>, be sure you can handle an exception.</p>
+</div>
+<div class="section level2">
+<h2 id="usage-from-cuda">Usage from cuda<a class="anchor" aria-label="anchor" href="#usage-from-cuda"></a>
+</h2>
+<p>This will work from CUDA without modification; see <a href="cuda"><code>cuda</code></a> for an example program. Be careful where the root is not found because <code><a href="https://rdrr.io/r/utils/apropos.html" class="external-link">lostturnip::find</a></code> will call <code>__trap()</code> which will crash the kernel and require the program to be restarted to continue.</p>
 </div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
