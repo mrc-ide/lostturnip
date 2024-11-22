@@ -22,3 +22,4 @@
 ^\.github$
 \.*gcov$
 ^cuda$
+^_pkgdown\.yml$
