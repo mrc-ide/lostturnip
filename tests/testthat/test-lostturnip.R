@@ -38,7 +38,7 @@ test_that("return failure if root not bracketed", {
   maxit <- 100
   expect_identical(
     test_find_result(function(x) x - 5, 6, 10, tol, maxit),
-    list(x = NA_real_, fx = NA_real_, iterations = 0L, converged = FALSE))
+    list(x = NaN, fx = NaN, iterations = 0L, converged = FALSE))
 })
 
 
